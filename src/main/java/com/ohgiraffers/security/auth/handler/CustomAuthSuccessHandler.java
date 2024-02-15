@@ -23,8 +23,9 @@ public class CustomAuthSuccessHandler extends SavedRequestAwareAuthenticationSuc
 
     // 사용자가 성공된 로그인을
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         User user = ((DetailsUser) authentication.getPrincipal()).getUser();
+        // json 형식으로 바꾸는 거
         JSONObject jsonValue = (JSONObject) ConvertUtil.convertObjectToJsonObject(user);
         HashMap<String, Object> responseMap = new HashMap<>();
         JSONObject jsonObject;

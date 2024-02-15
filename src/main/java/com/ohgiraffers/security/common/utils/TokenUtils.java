@@ -20,12 +20,12 @@ public class TokenUtils {
     private static Long tokenValidateTime;
 
     @Value("${jwt.key}")
-    public static void setJwtSecretKey(String jwtSecretKey) {
+    public void setJwtSecretKey(String jwtSecretKey) {
         TokenUtils.jwtSecretKey = jwtSecretKey;
     }
 
     @Value("${jwt.time}")
-    public static void setTokenValidateTime(Long tokenValidateTime) {
+    public void setTokenValidateTime(Long tokenValidateTime) {
         TokenUtils.tokenValidateTime = tokenValidateTime;
     }
 
@@ -50,7 +50,7 @@ public class TokenUtils {
     * @throws ExpiredJwtException, {@link io.jsonwebtoken.JwtException} {@link NullPointerException}
     * */
 
-    public static boolean isValidToken(String token){
+    public static boolean isValidToken(String token){   // 토큰이 유효하면 true 반환 토큰이 만료되도 false
         // claim은 payload이다. 복호화를 하면 여기에 있는 데이터를 바로 사용할 수 있다. 토큰이 유효하지 않으면 복호화 자체가 되지 않는다.
         try{
             Claims claims = getClaimsFormToken(token);
@@ -118,7 +118,7 @@ public class TokenUtils {
     * */
     private static Map<String, Object> createClaims(User user){
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userName", user.getUserName());
+        claims.put("userId", user.getUserId());
         claims.put("Role", user.getRole());
         claims.put("userEmail", user.getUserEmail());
         return claims;

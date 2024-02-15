@@ -1,6 +1,7 @@
 package com.ohgiraffers.security.auth.config;
 
 import com.ohgiraffers.security.auth.filter.CustomAuthenticationFilter;
+import com.ohgiraffers.security.auth.filter.JwtAuthorizationFilter;
 import com.ohgiraffers.security.auth.handler.CustomAuthFailureHandler;
 import com.ohgiraffers.security.auth.handler.CustomAuthSuccessHandler;
 import com.ohgiraffers.security.auth.handler.CustomAuthenticationProvider;
@@ -24,7 +25,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
 public class WebSecurityConfig {
-    /*
+    /**
     * 1. 정적 자원에 대한 인증된 사용자의 접근을 설정하는 메소드
     *
     * @return WebSecurityCustomizer
@@ -35,7 +36,7 @@ public class WebSecurityConfig {
         return web -> web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
-    /*
+    /**
     * security filter chain 설정
     *
     * @return SecurityFilterChain
@@ -45,7 +46,7 @@ public class WebSecurityConfig {
         // csrf = Cross-site Request Forgery 다른 사용자가 나인척하고 요청을 날리는?
         http.csrf(AbstractHttpConfigurer::disable)
                 // basicFilter대신 jwt를 사용하겠다는 뜻
-                .addFilterBefore(jwtAuthorizationFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthorizationFilter(), BasicAuthenticationFilter.class)// basic은 사용자 요청을 검증하는?
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))// security를 통해 세션을 만들지 않을 것이다.
                 .formLogin(form -> form.disable())
                 .addFilterBefore(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
@@ -54,7 +55,7 @@ public class WebSecurityConfig {
         return http.build();
     }
 
-    /*
+    /**
     * 3. Authentication의 인증 메소드를 제공하는 매니저로 Provider의 인터페이스를 의미한다.
     * @return AuthenticationManager
     * */
@@ -63,7 +64,7 @@ public class WebSecurityConfig {
         return new ProviderManager(customAuthenticatopnProvider()); // 매니저를 구현할
     }
 
-    /*
+    /**
     * 4. 사용자의 아이디와 패스워드를 DB와 검증하는 handler이다.
     *
     * @return CustomAuthenticationProvider
@@ -73,7 +74,7 @@ public class WebSecurityConfig {
         return new CustomAuthenticationProvider();
     }
 
-    /*
+    /**
     * 5. 비밀번호를 암호화 하는 인코더
     *
     * @return BcryptPasswordEncoder
@@ -83,7 +84,7 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /*
+    /**
     * 6. 사용자의 인증 요청을 가로채서 로그인 로직을 수행하는 필터
     * @return CustomAuthenticationFilter
     * */
@@ -94,8 +95,8 @@ public class WebSecurityConfig {
         authenticationFilter.setFilterProcessesUrl("/login");
         authenticationFilter.setAuthenticationSuccessHandler(customAuthSuccessHandler());
         authenticationFilter.setAuthenticationFailureHandler(customAuthFailureHandler());
-
-        return customAuthenticationFilter();
+        //customAuthenticationFilter().afterPropertiesSet();
+        return authenticationFilter;
     }
 
     /**
@@ -107,13 +108,21 @@ public class WebSecurityConfig {
         return new CustomAuthSuccessHandler();
     }
 
-    /*
+    /**
     * 8. spring security의 사용자 정보가 맞지 않은 경우 수행되는 메서드
     * @return
     * */
     @Bean
     public CustomAuthFailureHandler customAuthFailureHandler(){
         return new CustomAuthFailureHandler();
+    }
+
+    /**
+     * 9. 사용자 요청시 수행되는 메서드
+     * @return JwtAuthorizationFilter
+     */
+    public JwtAuthorizationFilter jwtAuthorizationFilter(){
+        return new JwtAuthorizationFilter(authenticationManager());
     }
 
 }

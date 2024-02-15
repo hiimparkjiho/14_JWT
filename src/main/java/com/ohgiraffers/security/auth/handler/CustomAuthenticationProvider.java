@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class CustomAuthenticationProvider implements AuthenticationProvider {
+    // 가로채는
     @Autowired
     private DetailsService detailsService;
 
